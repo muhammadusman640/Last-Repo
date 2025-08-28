@@ -1,4 +1,4 @@
-name: Deploy it on two different machines
+name: Deploy on Two Machines
 
 on:
   push:
@@ -7,10 +7,26 @@ on:
 
 jobs:
   remote_deploy:
-    runs-on: [self-hosted, OO]
+    runs-on: [self-hosted, local]
+
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          docker-compose down || true
-          docker-compose build
-          docker-compose up -d
+      # Step 1: Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Ensure Docker Compose is available
+      - name: Check Docker Compose
+        run: docker-compose --version
+
+      # Step 3: Stop any running containers (ignore errors if none)
+      - name: Stop running containers
+        run: docker-compose down --remove-orphans || true
+
+      # Step 4: Build images
+      - name: Build Docker images
+        run: docker-compose build
+
+      # Step 5: Start containers in detached mode
+      - name: Start containers
+        run: docker-compose up -d
+    
